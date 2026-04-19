@@ -39,25 +39,6 @@ Type any research query like *"Analyze NVIDIA's stock and recent news"* and the 
 - ✅ Source attribution on every AI insight
 - ✅ Structured UI output (cards, badges, metrics)
 
-## Project Structure
-
-klypup-research-dashboard/
-├── backend/
-│   ├── app/
-│   │   ├── api/routes/      # API endpoints
-│   │   ├── core/            # Auth, config
-│   │   ├── models/          # Database models
-│   │   ├── services/        # AI agent
-│   │   └── tools/           # Stock, news, vector tools
-│   ├── data/                # Document ingestion pipeline
-│   ├── requirements.txt
-│   └── .env.example
-├── frontend/
-│   ├── app/                 # Next.js pages
-│   ├── lib/                 # API client
-│   └── public/              # Static assets
-└── README.md
-
 ## Setup Instructions
 
 ### Prerequisites
