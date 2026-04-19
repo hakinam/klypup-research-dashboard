@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.database import engine
 from app.models import models
-from app.api.routes import auth
+from app.api.routes import auth, research, watchlist
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -17,6 +17,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(research.router, prefix="/api/research", tags=["Research"])
+app.include_router(watchlist.router, prefix="/api/watchlist", tags=["Watchlist"])
 
 @app.get("/")
 def root():
