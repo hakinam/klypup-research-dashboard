@@ -26,18 +26,18 @@ Type any research query like *"Analyze NVIDIA's stock and recent news"* and the 
 
 ## Features
 
-- ✅ JWT Authentication (signup, login, logout)
-- ✅ Multi-tenant architecture (org isolation via org_id)
-- ✅ Role-based access control (Admin / Analyst)
-- ✅ AI agent with 3 tools (stock, news, document search)
-- ✅ Real-time stock data (price, market cap, P/E, EPS)
-- ✅ News sentiment analysis (positive/negative/neutral)
-- ✅ RAG document search (ChromaDB vector store)
-- ✅ Saved research reports (full CRUD)
-- ✅ Company watchlist
-- ✅ Organization invite code system
-- ✅ Source attribution on every AI insight
-- ✅ Structured UI output (cards, badges, metrics)
+-  JWT Authentication (signup, login, logout)
+-  Multi-tenant architecture (org isolation via org_id)
+-  Role-based access control (Admin / Analyst)
+-  AI agent with 3 tools (stock, news, document search)
+-  Real-time stock data (price, market cap, P/E, EPS)
+-  News sentiment analysis (positive/negative/neutral)
+-  RAG document search (ChromaDB vector store)
+-  Saved research reports (full CRUD)
+-  Company watchlist
+-  Organization invite code system
+-  Source attribution on every AI insight
+-  Structured UI output (cards, badges, metrics)
 
 ## Setup Instructions
 
