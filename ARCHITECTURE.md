@@ -82,16 +82,16 @@ sequenceDiagram
     FE->>FE: Render cards, metrics, chart, news, recommendation
 
 ```
-What happens in practice
-User types a natural-language query in the dashboard.
-Frontend sends POST /api/research/query with the JWT token.
-Backend resolves the authenticated user via deps.py.
-research.py calls run_agent(query).
-The agent asks Groq which tools are needed for the query.
-The backend executes the selected tools.
-Tool results are sent back to Groq for synthesis into structured JSON.
-Backend stores the result in research_reports.
-Frontend renders the response as structured UI components.
+### What happens in practice: 
+- User types a natural-language query in the dashboard.
+- Frontend sends POST /api/research/query with the JWT token.
+- Backend resolves the authenticated user via deps.py.
+- research.py calls run_agent(query).
+- The agent asks Groq which tools are needed for the query.
+- The backend executes the selected tools.
+- Tool results are sent back to Groq for synthesis into structured JSON.
+- Backend stores the result in research_reports.
+- Frontend renders the response as structured UI components.
 ## 3. Database Schema
 ```mermaid
 erDiagram
@@ -138,11 +138,11 @@ erDiagram
     }
 
 ```
-Multi-tenant enforcement
-users, research_reports, and watchlist are scoped through org_id.
-Every protected route resolves the current user from the JWT.
-Research reports and watchlist queries are filtered by current_user.org_id.
-This prevents one organization from viewing another organization’s data.
+### Multi-tenant enforcement
+- users, research_reports, and watchlist are scoped through org_id.
+- Every protected route resolves the current user from the JWT.
+- Research reports and watchlist queries are filtered by current_user.org_id.
+- This prevents one organization from viewing another organization’s data.
 ## 4. AI Orchestration Flow
 ```mermaid
 flowchart TD
@@ -161,13 +161,13 @@ flowchart TD
     O --> UI["Rendered as cards, charts, badges, sections"]
 
 ```
-Notes
-Tool use is query-dependent, not a fixed hardcoded sequence.
-If the user only asks for news, the system should prefer news-related tools.
-If the user asks about filings or earnings details, document search is included.
-The final output is structured JSON, not raw markdown.
+### - Notes
+- Tool use is query-dependent, not a fixed hardcoded sequence.
+- If the user only asks for news, the system should prefer news-related tools.
+- If the user asks about filings or earnings details, document search is included.
+- The final output is structured JSON, not raw markdown.
 Fallback behavior
-If tool-calling or provider responses fail, the agent includes a fallback path that attempts manual tool selection based on the query and returns a degraded but usable result when possible.
+- If tool-calling or provider responses fail, the agent includes a fallback path that attempts manual tool selection based on the query and returns a degraded but usable result when possible.
 ## 5. Multi-Tenant Data Flow
 ```mermaid
 flowchart TD
@@ -185,9 +185,9 @@ flowchart TD
     Save --> Isolated
 
 ```
-Example
-If current_user.org_id = 2, all report and watchlist queries are filtered to org 2.
-Data belonging to org 3 is never returned by these routes.
+### Example
+- If current_user.org_id = 2, all report and watchlist queries are filtered to org 2.
+- Data belonging to org 3 is never returned by these routes.
 
 ## 6. API Design
 
