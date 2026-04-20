@@ -1,144 +1,213 @@
-# Klypup Research Dashboard 🚀
+# Architecture Document — Klypup Research Dashboard
 
-An AI-powered investment research platform that lets analysts research any company in seconds. Built for the Klypup Applied AI Intern Assessment — Option A.
+## 1. System Architecture Overview
 
-## Screenshots
+```mermaid
+flowchart TB
+    subgraph Client["Client Layer"]
+        FE["Next.js Frontend<br/>Port 3000"]
+        UI["Pages:<br/>Login<br/>Dashboard<br/>Reports<br/>Watchlist<br/>Admin Panel"]
+        APIClient["Axios API Client<br/>frontend/lib/api.ts"]
+        FE --> UI
+        FE --> APIClient
+    end
 
-![Login Page](frontend/public/screenshots/login.png)
-![Dashboard](frontend/public/screenshots/dashboard.png)
-![Query Results](frontend/public/screenshots/results.png)
-![Admin Panel](frontend/public/screenshots/admin.png)
+    subgraph API["API Layer"]
+        BE["FastAPI Backend<br/>Port 8000"]
+        Auth["/api/auth<br/>signup, login"]
+        Research["/api/research<br/>query, reports, stock-chart"]
+        Watchlist["/api/watchlist<br/>add, remove, list"]
+        Deps["Auth Middleware<br/>deps.py<br/>JWT verification + current user resolution"]
+        BE --> Auth
+        BE --> Research
+        BE --> Watchlist
+        BE --> Deps
+    end
 
-## What it does
+    subgraph Data["Data Layer"]
+        SQL["SQLite<br/>users<br/>organizations<br/>research_reports<br/>watchlist"]
+        Chroma["ChromaDB<br/>sample earnings reports<br/>SEC-style filings<br/>document chunks"]
+    end
 
-Type any research query like *"Analyze NVIDIA's stock and recent news"* and the AI agent automatically:
-- Fetches real-time stock data from Yahoo Finance
-- Gets latest news articles with sentiment analysis
-- Searches through earnings reports and SEC filings using RAG
-- Synthesizes everything into a structured analysis with insights, risks, and recommendations
-- Renders results as cards, charts, sentiment badges — not raw text
+    subgraph AI["AI Layer"]
+        Agent["AI Agent<br/>backend/app/services/agent.py"]
+        Groq["Groq API<br/>Llama 3.3 70B"]
+        Stock["Stock Tool<br/>yfinance"]
+        News["News Tool<br/>NewsAPI"]
+        Vector["Vector Tool<br/>ChromaDB search"]
+        Agent --> Groq
+        Agent --> Stock
+        Agent --> News
+        Agent --> Vector
+    end
 
-## Tech Stack
+    FE -->|HTTP + JWT| BE
+    Research --> Agent
+    BE --> SQL
+    Vector --> Chroma
+    Stock -->|Yahoo Finance| YF["Yahoo Finance"]
+    News -->|REST API| NewsAPI["NewsAPI"]
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Backend | FastAPI (Python) | Fast, async, great for AI workloads. Prior experience. |
-| Database | SQLite | Zero setup, file-based, perfect for 5-day timeline |
-| Frontend | Next.js + React | Modern, fast, great developer experience |
-| AI/LLM | Groq (Llama 3.3 70B) | Free, extremely fast inference, supports tool calling |
-| Vector DB | ChromaDB | Local RAG, no external service needed |
-| Stock Data | Yahoo Finance (yfinance) | Free, no API key required |
-| News | NewsAPI | Free tier, well documented |
-| Charts | Recharts | Clean React charting library |
+    ```mermaid
+sequenceDiagram
+    participant User
+    participant FE as Next.js Frontend
+    participant API as FastAPI Backend
+    participant Auth as deps.py / JWT
+    participant Agent as AI Agent
+    participant Stock as Stock Tool
+    participant News as News Tool
+    participant Vector as Vector Tool
+    participant DB as SQLite
 
-## Features
+    User->>FE: Enter research query
+    FE->>API: POST /api/research/query + JWT
+    API->>Auth: Resolve current user from token
+    Auth-->>API: current_user
+    API->>Agent: run_agent(query)
 
-- ✅ JWT Authentication (signup, login, logout, protected routes)
-- ✅ Multi-tenant architecture (org isolation via org_id on every query)
-- ✅ Role-based access control (Admin vs Analyst — different UI and permissions)
-- ✅ AI agent with 3 tools (stock data, news, document search)
-- ✅ Intelligent tool calling (agent decides which tools to use per query)
-- ✅ Real-time stock data (price, market cap, P/E ratio, EPS)
-- ✅ Interactive stock price charts (5D, 1M, 3M, 6M, 1Y periods)
-- ✅ News sentiment analysis (positive/negative/neutral classification)
-- ✅ RAG document search (ChromaDB vector store with earnings reports)
-- ✅ Saved research reports (full CRUD)
-- ✅ Company watchlist (add from results, remove anytime)
-- ✅ Organization invite code system
-- ✅ Source attribution on every AI insight
-- ✅ Admin panel with role permissions overview
-- ✅ Structured UI output (cards, badges, metrics, charts)
+    Agent->>Agent: Send query + tool definitions to Groq
+    Agent->>Stock: get_stock_data(symbol) if needed
+    Agent->>News: get_news(company, symbol) if needed
+    Agent->>Vector: search_documents(query) if needed
+    Stock-->>Agent: market data
+    News-->>Agent: news + sentiment
+    Vector-->>Agent: relevant document chunks
 
-## Setup Instructions
+    Agent->>Agent: Send tool results back to Groq
+    Agent-->>API: structured JSON result
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Groq API key — free at [console.groq.com](https://console.groq.com)
-- NewsAPI key — free at [newsapi.org](https://newsapi.org)
+    API->>DB: Save ResearchReport with org_id and user_id
+    API-->>FE: report_id, result, created_at
+    FE->>FE: Render cards, metrics, chart, news, recommendation
 
-### Backend Setup
-
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
 ```
 
-Create `.env` file (see `.env.example`):
-GROQ_API_KEY=your_groq_key_here
-NEWS_API_KEY=your_newsapi_key_here
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=sqlite:///./research.db
+What happens in practice
+User types a natural-language query in the dashboard.
+Frontend sends POST /api/research/query with the JWT token.
+Backend resolves the authenticated user via deps.py.
+research.py calls run_agent(query).
+The agent asks Groq which tools are needed for the query.
+The backend executes the selected tools.
+Tool results are sent back to Groq for synthesis into structured JSON.
+Backend stores the result in research_reports.
+Frontend renders the response as structured UI components.
 
-Ingest sample financial documents into ChromaDB:
-```bash
-python data/sample_docs.py
+```mermaid
+erDiagram
+    ORGANIZATIONS ||--o{ USERS : has
+    ORGANIZATIONS ||--o{ RESEARCH_REPORTS : owns
+    USERS ||--o{ RESEARCH_REPORTS : creates
+    USERS ||--o{ WATCHLIST : adds
+
+    ORGANIZATIONS {
+        int id PK
+        string name
+        string invite_code
+        datetime created_at
+    }
+
+    USERS {
+        int id PK
+        string email
+        string name
+        string hashed_password
+        string role
+        int org_id FK
+        datetime created_at
+    }
+
+    RESEARCH_REPORTS {
+        int id PK
+        string title
+        text query
+        text result
+        string tags
+        int org_id FK
+        int user_id FK
+        datetime created_at
+    }
+
+    WATCHLIST {
+        int id PK
+        string symbol
+        string company_name
+        int user_id FK
+        int org_id FK
+        datetime created_at
+    }
+
 ```
 
-Start the backend:
-```bash
-uvicorn app.main:app --reload
+datetime
+created_at
+WATCHLIST
+int
+id
+PK
+string
+symbol
+string
+company_name
+int
+user_id
+FK
+int
+org_id
+FK
+datetime
+created_at
+Multi-tenant enforcement
+users, research_reports, and watchlist are scoped through org_id.
+Every protected route resolves the current user from the JWT.
+Research reports and watchlist queries are filtered by current_user.org_id.
+This prevents one organization from viewing another organization’s data.
+
+
+```mermaid
+flowchart TD
+    Q["User Query"] --> P["Groq call #1<br/>Query + tool definitions"]
+    P --> D["Tool selection by model"]
+    D --> S["Stock Tool if market data needed"]
+    D --> N["News Tool if recent news needed"]
+    D --> V["Vector Tool if filings/docs needed"]
+
+    S --> R["Collected tool results"]
+    N --> R
+    V --> R
+
+    R --> G["Groq call #2<br/>Synthesize structured JSON"]
+    G --> O["Structured output:<br/>summary<br/>companies<br/>news_highlights<br/>risk_assessment<br/>recommendation<br/>sources"]
+    O --> UI["Rendered as cards, charts, badges, sections"]
+
 ```
 
-Backend runs at **http://127.0.0.1:8000**
-API docs at **http://127.0.0.1:8000/docs**
+Notes
+Tool use is query-dependent, not a fixed hardcoded sequence.
+If the user only asks for news, the system should prefer news-related tools.
+If the user asks about filings or earnings details, document search is included.
+The final output is structured JSON, not raw markdown.
+Fallback behavior
+If tool-calling or provider responses fail, the agent includes a fallback path that attempts manual tool selection based on the query and returns a degraded but usable result when possible.
 
-### Frontend Setup
+```mermaid
+flowchart TD
+    Req["Incoming API request<br/>Authorization: Bearer <token>"] --> Auth["get_current_user() in deps.py"]
+    Auth --> Decode["Decode JWT"]
+    Decode --> User["Fetch user from database"]
+    User --> Current["current_user with user_id, org_id, role"]
 
-```bash
-cd frontend
-npm install
-npm run dev
+    Current --> Query1["Reports query filtered by current_user.org_id"]
+    Current --> Query2["Watchlist query filtered by current_user.org_id"]
+    Current --> Save["New research report saved with current_user.org_id"]
+
+    Query1 --> Isolated["Org A only sees Org A data"]
+    Query2 --> Isolated
+    Save --> Isolated
+
 ```
 
-Frontend runs at **http://localhost:3000**
-
-## Demo Workflows
-
-### 1. AI Research Query
-- Sign up and create an organization
-- Type any company query: *"Analyze Apple stock and recent news"*
-- Watch the AI agent fetch real data and return structured analysis
-- View interactive stock price chart with period selector
-- Add company to watchlist directly from results
-
-### 2. Multi-Tenant Isolation
-- Create two accounts with different organization names
-- Run queries in each — reports are completely separate
-- Share invite code with teammates to join same workspace
-- Admins can see invite code, analysts cannot
-
-### 3. Role-Based Access
-- Login as **Admin** — see Admin Panel, delete reports, view invite code
-- Login as **Analyst** — no Admin Panel, no delete button, no invite code
-
-## API Endpoints
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | /api/auth/signup | No | Create account + org |
-| POST | /api/auth/login | No | Login, get JWT token |
-| POST | /api/research/query | Yes | Run AI research query |
-| GET | /api/research/reports | Yes | Get all saved reports |
-| GET | /api/research/reports/{id} | Yes | Get single report |
-| DELETE | /api/research/reports/{id} | Yes | Delete a report |
-| GET | /api/research/stock-chart | Yes | Get stock price history |
-| GET | /api/watchlist/ | Yes | Get watchlist |
-| POST | /api/watchlist/ | Yes | Add to watchlist |
-| DELETE | /api/watchlist/{id} | Yes | Remove from watchlist |
-
-## Known Limitations
-
-- SQLite used instead of PostgreSQL — fine for demo, not for production
-- Sentiment analysis is keyword-based, not ML-based
-- No real-time streaming of AI responses
-- Sample financial documents are synthetic, not real SEC filings
-- NewsAPI free tier limited to 100 requests/day
-- Groq free tier limited to 100,000 tokens/day
-
-## Author
-
-**Innam Ul Haq**
-innamhaq7@gmail.com | [LinkedIn](https://linkedin.com/in/innamhaq) | [GitHub](https://github.com/hakinam)
+Example
+If current_user.org_id = 2, all report and watchlist queries are filtered to org 2.
+Data belonging to org 3 is never returned by these routes.
