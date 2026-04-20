@@ -14,9 +14,16 @@ export default function Dashboard() {
   const [result, setResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('query');
 
+  const isAdmin = () => {
+    const u = localStorage.getItem('user');
+    if (!u) return false;
+    return JSON.parse(u).role === 'admin';
+  };
+
   useEffect(() => {
     if (!localStorage.getItem('token')) { router.push('/'); return; }
-    setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    setUser(storedUser);
     setOrg(JSON.parse(localStorage.getItem('org') || '{}'));
     fetchReports();
     fetchWatchlist();
@@ -39,131 +46,170 @@ export default function Dashboard() {
     finally { setLoading(false); }
   };
   const handleLogout = () => { localStorage.clear(); router.push('/'); };
-
   const sentimentColor = (s: string) =>
-    s === 'positive' ? '#22c55e' : s === 'negative' ? '#ef4444' : '#f59e0b';
+    s === 'positive' ? '#10b981' : s === 'negative' ? '#ef4444' : '#f59e0b';
   const sentimentBg = (s: string) =>
-    s === 'positive' ? 'rgba(34,197,94,0.1)' : s === 'negative' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)';
+    s === 'positive' ? 'rgba(16,185,129,0.1)' : s === 'negative' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)';
 
   const tabs = [
-    { id: 'query', label: 'New Research', icon: '🔍' },
-    { id: 'reports', label: 'Saved Reports', icon: '📋' },
-    { id: 'watchlist', label: 'Watchlist', icon: '⭐' },
+    { id: 'query', label: 'New Research', icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    )},
+    { id: 'reports', label: 'Saved Reports', icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    )},
+    { id: 'watchlist', label: 'Watchlist', icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    )},
+    ...(isAdmin() ? [{ id: 'admin', label: 'Admin Panel', icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+    )}] : []),
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: '#030811', display: 'flex', flexDirection: 'column' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: '#080c14',
+      display: 'flex',
+      flexDirection: 'column',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
+    }}>
+      {/* Animated background */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: `
+          radial-gradient(ellipse 80% 50% at 20% -20%, rgba(59,130,246,0.15) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 80% 100%, rgba(37,99,235,0.1) 0%, transparent 60%),
+          radial-gradient(ellipse 40% 30% at 60% 50%, rgba(16,185,129,0.05) 0%, transparent 50%)
+        `
+      }} />
+
       {/* Navbar */}
       <nav style={{
-        background: 'rgba(15,23,42,0.95)', borderBottom: '1px solid rgba(13, 2, 2, 0.06)',
-        padding: '0 32px', display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between', height: '64px', backdropFilter: 'blur(20px)',
-        position: 'sticky', top: 0, zIndex: 100
+        position: 'sticky', top: 0, zIndex: 100,
+        background: 'rgba(8,12,20,0.85)',
+        backdropFilter: 'blur(24px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '0 28px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        height: '60px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: '8px',
-            background: 'linear-gradient(135deg, #698dc8, rgb(4, 1, 11))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '25px'
-          }}>💰</div>
-          <span style={{ fontWeight: '700', fontSize: '18px', color: '#e1d2c6' }}>Klypup Research</span>
+            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 16px rgba(59,130,246,0.5)'
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="16 7 22 7 22 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span style={{
+            fontSize: '16px', fontWeight: '700', letterSpacing: '-0.3px',
+            background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+          }}>Klypup Research</span>
           <div style={{
-            marginLeft: '8px', padding: '3px 10px', borderRadius: '20px', fontSize: '11px',
-            background: 'rgba(71, 137, 243, 0.15)', color: '#60a5fa', fontWeight: '600'
-          }}>AI Powered</div>
+            fontSize: '10px', fontWeight: '600', letterSpacing: '0.5px',
+            color: '#3b82f6', background: 'rgba(59,130,246,0.12)',
+            border: '1px solid rgba(59,130,246,0.25)',
+            padding: '2px 8px', borderRadius: '20px'
+          }}>AI POWERED</div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {org && (
             <div style={{
-              padding: '6px 14px', borderRadius: '8px', fontSize: '13px',
-              background: 'rgba(29, 23, 23, 0.04)', border: '1px solid rgba(255,255,255,0.06)',
-              color: '#bfcee1'
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '6px 12px', borderRadius: '8px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)'
             }}>
-              🏢 {org.name}
-              <span style={{ color: '#475569', marginLeft: '8px', fontSize: '11px' }}>
-                #{org.invite_code}
-              </span>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
+              <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '500' }}>{org.name}</span>
+              {isAdmin() && (
+                <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace' }}>
+                  🔑 {org.invite_code}
+                </span>
+              )}
             </div>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '5px 10px', borderRadius: '8px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.06)'
+          }}>
             <div style={{
-              width: '34px', height: '34px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #132a50, #7f95a6)',
+              width: '26px', height: '26px', borderRadius: '6px',
+              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: '700', color: 'white', fontSize: '14px'
-            }}>
-              {user?.name?.[0]?.toUpperCase()}
-            </div>
+              fontSize: '12px', fontWeight: '700', color: 'white'
+            }}>{user?.name?.[0]?.toUpperCase()}</div>
             <div>
-              <p style={{ fontSize: '13px', color: '#f1f5f9', fontWeight: '600', lineHeight: 1 }}>{user?.name}</p>
-              <p style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>{user?.role}</p>
+              <p style={{ fontSize: '12px', fontWeight: '600', color: '#e2e8f0', lineHeight: 1 }}>{user?.name}</p>
+              <p style={{ fontSize: '10px', color: '#475569', marginTop: '1px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{user?.role}</p>
             </div>
           </div>
           <button onClick={handleLogout} style={{
-            padding: '8px 16px', background: 'rgba(239,68,68,0.1)',
-            border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
-            color: '#f87171', fontSize: '13px', fontWeight: '600', cursor: 'pointer'
-          }}>Logout</button>
+            padding: '6px 14px', fontSize: '12px', fontWeight: '600',
+            background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
+            borderRadius: '7px', color: '#ef4444', cursor: 'pointer'
+          }}>Sign out</button>
         </div>
       </nav>
 
-      <div style={{ display: 'flex', flex: 1 }}>
+      <div style={{ display: 'flex', flex: 1, position: 'relative', zIndex: 1 }}>
         {/* Sidebar */}
         <div style={{
-          width: '240px', background: 'rgba(15,23,42,0.6)',
+          width: '220px', flexShrink: 0,
+          background: 'rgba(255,255,255,0.02)',
           borderRight: '1px solid rgba(255,255,255,0.05)',
-          padding: '24px 16px', flexShrink: 0
+          padding: '20px 12px',
+          display: 'flex', flexDirection: 'column', gap: '4px'
         }}>
-          <p style={{ fontSize: '11px', color: '#475569', fontWeight: '600',
-            textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', paddingLeft: '8px'
-          }}>Navigation</p>
+          <p style={{
+            fontSize: '10px', fontWeight: '700', letterSpacing: '1px',
+            color: '#64748b', textTransform: 'uppercase', padding: '0 8px', marginBottom: '8px'
+          }}>Menu</p>
 
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              width: '100%', padding: '11px 14px', borderRadius: '10px',
-              border: 'none', cursor: 'pointer', marginBottom: '4px',
-              background: activeTab === tab.id
-                ? 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))'
-                : 'transparent',
-              color: activeTab === tab.id ? '#93c5fd' : '#64748b',
-              display: 'flex', alignItems: 'center', gap: '10px',
-              fontSize: '14px', fontWeight: activeTab === tab.id ? '600' : '400',
-              textAlign: 'left',
-              borderLeft: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent'
+              width: '100%', padding: '9px 12px', borderRadius: '8px',
+              border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '9px',
+              fontSize: '13px', fontWeight: activeTab === tab.id ? '600' : '400',
+              background: activeTab === tab.id ? 'rgba(59,130,246,0.15)' : 'transparent',
+              color: activeTab === tab.id ? '#60a5fa' : '#64748b',
+              borderLeft: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent',
+              transition: 'all 0.15s', textAlign: 'left'
             }}>
-              <span>{tab.icon}</span> {tab.label}
+              {tab.icon} {tab.label}
             </button>
           ))}
 
-          {/* Stats */}
-          <div style={{ marginTop: '32px', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <p style={{ fontSize: '11px', color: '#475569', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Workspace</p>
+          <div style={{ marginTop: '20px', padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', marginBottom: '10px' }}>Workspace</p>
             {[
-              { label: 'Reports', value: reports.length },
-              { label: 'Watchlist', value: watchlist.length },
-            ].map((stat, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', color: '#64748b' }}>{stat.label}</span>
-                <span style={{ fontSize: '13px', color: '#f1f5f9', fontWeight: '700' }}>{stat.value}</span>
+              { label: 'Reports', value: reports.length, color: '#3b82f6' },
+              { label: 'Watchlist', value: watchlist.length, color: '#10b981' },
+            ].map((s, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>{s.label}</span>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: s.color }}>{s.value}</span>
               </div>
             ))}
           </div>
 
-          {/* Example queries */}
           {activeTab === 'query' && (
-            <div style={{ marginTop: '16px' }}>
-              <p style={{ fontSize: '11px', color: '#475569', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Try These</p>
-              {[
-                'Analyze NVIDIA stock',
-                'Apple Q4 2024 earnings',
-                'Compare Tesla and Ford',
-              ].map((q, i) => (
+            <div style={{ marginTop: '12px' }}>
+              <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', padding: '0 2px', marginBottom: '8px' }}>Quick Queries</p>
+              {['Analyze NVIDIA stock', 'Apple Q4 2024 earnings', 'Tesla risk assessment'].map((q, i) => (
                 <button key={i} onClick={() => setQuery(q)} style={{
-                  width: '100%', padding: '8px 10px', borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.05)', background: 'transparent',
-                  color: '#64748b', fontSize: '12px', cursor: 'pointer',
-                  marginBottom: '6px', textAlign: 'left'
+                  width: '100%', padding: '7px 10px', borderRadius: '6px', marginBottom: '4px',
+                  border: '1px solid rgba(255,255,255,0.04)', background: 'transparent',
+                  color: '#64748b', fontSize: '11px', cursor: 'pointer', textAlign: 'left',
                 }}>→ {q}</button>
               ))}
             </div>
@@ -171,217 +217,196 @@ export default function Dashboard() {
         </div>
 
         {/* Main content */}
-        <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+        <div style={{ flex: 1, padding: '28px 32px', overflowY: 'auto' }}>
 
-          {/* Query Tab */}
+          {/* QUERY TAB */}
           {activeTab === 'query' && (
             <div>
-              <div style={{ marginBottom: '28px' }}>
-                <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#f1f5f9', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>
                   Research Query
-                </h2>
-                <p style={{ color: '#475569', fontSize: '14px' }}>
-                  Ask anything about stocks, companies, or market trends
-                </p>
+                </h1>
+                <p style={{ color: '#64748b', fontSize: '13px' }}>Powered by Groq · Llama 3.3 70B · Real-time data</p>
               </div>
 
               {/* Search bar */}
               <div style={{
-                display: 'flex', gap: '12px', marginBottom: '28px',
-                background: 'rgba(30,41,59,0.6)', borderRadius: '14px',
-                padding: '8px', border: '1px solid rgba(255,255,255,0.06)'
+                display: 'flex', gap: '10px', marginBottom: '28px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '12px', padding: '6px 6px 6px 16px',
               }}>
                 <input value={query} onChange={e => setQuery(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleQuery()}
-                  placeholder="e.g. Analyze Apple stock and recent news, Compare NVIDIA and AMD..."
+                  placeholder="Ask about any company, stock, or market trend..."
                   style={{
-                    flex: 1, padding: '12px 16px', background: 'transparent',
-                    border: 'none', color: '#f1f5f9', fontSize: '15px', outline: 'none'
+                    flex: 1, background: 'transparent', border: 'none',
+                    color: '#e2e8f0', fontSize: '14px', outline: 'none', padding: '8px 0'
                   }} />
                 <button onClick={handleQuery} disabled={loading} style={{
-                  padding: '12px 28px',
-                  background: loading ? '#1e293b' : 'linear-gradient(135deg, #22447c, #06030d)',
-                  color: 'white', border: 'none', borderRadius: '10px',
-                  fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer',
-                  fontSize: '14px', whiteSpace: 'nowrap'
+                  padding: '10px 22px', borderRadius: '8px', border: 'none',
+                  background: loading ? 'rgba(59,130,246,0.3)' : 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                  color: 'white', fontWeight: '600', fontSize: '13px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  boxShadow: loading ? 'none' : '0 0 20px rgba(59,130,246,0.4)'
                 }}>
-                  {loading ? '⏳ Analyzing...' : '🔍 Analyze'}
+                  {loading ? 'Analyzing...' : 'Analyze →'}
                 </button>
               </div>
 
               {/* Loading */}
               {loading && (
                 <div style={{
-                  background: 'rgba(30,41,59,0.6)', borderRadius: '16px', padding: '48px',
-                  textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)'
+                  borderRadius: '14px', padding: '48px', textAlign: 'center',
+                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)'
                 }}>
-                  <div style={{ fontSize: '40px', marginBottom: '16px' }}>👀</div>
-                  <p style={{ color: '#f1f5f9', fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
-                    AI Agent is working...
+                  <div style={{ fontSize: '36px', marginBottom: '16px' }}>⚙️</div>
+                  <p style={{ color: '#e2e8f0', fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Agent is working</p>
+                  <p style={{ color: '#64748b', fontSize: '13px' }}>
+                    Fetching stock data → Scanning news → Searching documents → Synthesizing
                   </p>
-                  <p style={{ color: '#475569', fontSize: '14px' }}>
-                    Fetching stock prices → Getting latest news → Searching documents → Synthesizing analysis
-                  </p>
+                </div>
+              )}
+
+              {/* Hero */}
+              {!result && !loading && (
+                <div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', marginBottom: '20px' }}>
+                    {[
+                      { label: 'AI Model', value: 'Llama 3.3', sub: 'Groq Inference', color: '#3b82f6' },
+                      { label: 'Data Tools', value: '3 Active', sub: 'Stock · News · Docs', color: '#2563eb' },
+                      { label: 'Reports', value: reports.length, sub: 'This workspace', color: '#10b981' },
+                      { label: 'Watchlist', value: watchlist.length, sub: 'Companies', color: '#f59e0b' },
+                    ].map((s, i) => (
+                      <div key={i} style={{
+                        padding: '18px', borderRadius: '12px',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${s.color}22`,
+                        borderTop: `2px solid ${s.color}`
+                      }}>
+                        <p style={{ color: s.color, fontSize: '26px', fontWeight: '800', marginBottom: '4px' }}>{s.value}</p>
+                        <p style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600' }}>{s.label}</p>
+                        <p style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>{s.sub}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ borderRadius: '14px', padding: '24px', marginBottom: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', marginBottom: '18px' }}>How the AI Agent Works</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px' }}>
+                      {[
+                        { n: '01', title: 'Natural language query', desc: 'Type anything — company name, comparison, earnings report, risk assessment.', color: '#3b82f6' },
+                        { n: '02', title: 'Intelligent tool calling', desc: 'Agent selects which tools to use — stock API, news API, or vector document search.', color: '#2563eb' },
+                        { n: '03', title: 'Structured output', desc: 'Results rendered as cards, metrics, sentiment badges, and source-attributed insights.', color: '#10b981' },
+                      ].map((s, i) => (
+                        <div key={i} style={{ padding: '16px', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${s.color}18` }}>
+                          <div style={{ fontSize: '10px', fontWeight: '800', color: s.color, background: `${s.color}15`, padding: '2px 8px', borderRadius: '20px', display: 'inline-block', marginBottom: '10px', letterSpacing: '1px' }}>STEP {s.n}</div>
+                          <p style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>{s.title}</p>
+                          <p style={{ color: '#94a3b8', fontSize: '12px', lineHeight: '1.6' }}>{s.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ borderRadius: '14px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', marginBottom: '14px' }}>Example Queries</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '8px' }}>
+                      {[
+                        { q: 'Analyze Apple stock and recent news', tag: 'Stock' },
+                        { q: 'What did NVIDIA say in Q3 2024 earnings?', tag: 'Earnings' },
+                        { q: 'Compare Microsoft and Google performance', tag: 'Compare' },
+                        { q: 'Give me a risk assessment of Tesla', tag: 'Risk' },
+                        { q: 'Latest news on Amazon', tag: 'News' },
+                        { q: 'Analyze Microsoft Q1 2025 earnings', tag: 'Earnings' },
+                      ].map((item, i) => (
+                        <button key={i} onClick={() => setQuery(item.q)} style={{
+                          padding: '12px 14px', borderRadius: '8px', cursor: 'pointer',
+                          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+                          textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                          <span style={{ color: '#94a3b8', fontSize: '12px' }}>{item.q}</span>
+                          <span style={{ fontSize: '10px', fontWeight: '700', color: '#3b82f6', background: 'rgba(59,130,246,0.1)', padding: '2px 7px', borderRadius: '20px', flexShrink: 0, marginLeft: '8px' }}>{item.tag}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Results */}
               {result && !loading && (
                 <div>
-                  {/* Summary */}
-                  <div style={{
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1))',
-                    borderRadius: '16px', padding: '24px', marginBottom: '20px',
-                    border: '1px solid rgba(59,130,246,0.2)'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '16px' }}>📈</span>
-                      <p style={{ color: '#60a5fa', fontSize: '12px', fontWeight: '700',
-                        textTransform: 'uppercase', letterSpacing: '1px' }}>AI Summary</p>
-                    </div>
-                    <p style={{ color: '#e2e8f0', lineHeight: '1.7', fontSize: '15px' }}>{result.summary}</p>
+                  <div style={{ padding: '20px', borderRadius: '12px', marginBottom: '16px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)' }}>
+                    <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1px', color: '#60a5fa', textTransform: 'uppercase', marginBottom: '8px' }}>AI Summary</p>
+                    <p style={{ color: '#e2e8f0', lineHeight: '1.7', fontSize: '14px' }}>{result.summary}</p>
                   </div>
 
-                  {/* Company cards */}
                   {result.companies?.map((company: any, i: number) => (
-                    <div key={i} style={{
-                      background: 'rgba(30,41,59,0.6)', borderRadius: '16px', padding: '24px',
-                      marginBottom: '20px', border: '1px solid rgba(255,255,255,0.06)'
-                    }}>
-                      {/* Company header */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                          <div style={{
-                            width: '48px', height: '48px', borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #3b82f6, #111017)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontWeight: '800', color: 'white', fontSize: '16px'
-                          }}>
-                            {company.symbol?.[0]}
-                          </div>
+                    <div key={i} style={{ padding: '22px', borderRadius: '12px', marginBottom: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'linear-gradient(135deg, #2563eb, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', color: 'white', fontSize: '15px' }}>{company.symbol?.[0]}</div>
                           <div>
-                            <h3 style={{ color: '#f1f5f9', fontSize: '20px', fontWeight: '800' }}>
-                              {company.name}
-                            </h3>
-                            <p style={{ color: '#475569', fontSize: '13px' }}>{company.symbol} · Stock Analysis</p>
+                            <h3 style={{ color: '#f1f5f9', fontSize: '17px', fontWeight: '700', letterSpacing: '-0.3px' }}>{company.name}</h3>
+                            <p style={{ color: '#64748b', fontSize: '12px' }}>{company.symbol} · Stock Analysis</p>
                           </div>
                         </div>
-                        <span style={{
-                          padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: '700',
-                          background: sentimentBg(company.sentiment),
-                          color: sentimentColor(company.sentiment),
-                          border: `1px solid ${sentimentColor(company.sentiment)}33`
-                        }}>
-                          {company.sentiment === 'positive' ? '↑' : company.sentiment === 'negative' ? '↓' : '→'} {company.sentiment}
+                        <span style={{ padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', background: sentimentBg(company.sentiment), color: sentimentColor(company.sentiment), border: `1px solid ${sentimentColor(company.sentiment)}33` }}>
+                          {company.sentiment === 'positive' ? '▲' : company.sentiment === 'negative' ? '▼' : '●'} {company.sentiment}
                         </span>
                       </div>
 
-                      {/* Metrics grid */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px', marginBottom: '16px' }}>
                         {[
-                          { label: 'Current Price', value: `$${company.current_price}`, icon: '💵' },
-                          { label: 'Market Cap', value: company.market_cap, icon: '🏦' },
-                          { label: 'P/E Ratio', value: company.pe_ratio, icon: '📉' },
-                          { label: '30d Change', value: company.price_change_30d, icon: '📈' },
-                        ].map((metric, j) => (
-                          <div key={j} style={{
-                            background: 'rgba(15,23,42,0.6)', borderRadius: '12px', padding: '16px',
-                            border: '1px solid rgba(255,255,255,0.04)'
-                          }}>
-                            <p style={{ color: '#475569', fontSize: '11px', marginBottom: '6px', fontWeight: '600' }}>
-                              {metric.icon} {metric.label}
-                            </p>
-                            <p style={{ color: '#f1f5f9', fontSize: '18px', fontWeight: '800' }}>{metric.value}</p>
+                          { label: 'Price', value: `$${company.current_price}` },
+                          { label: 'Market Cap', value: company.market_cap },
+                          { label: 'P/E Ratio', value: company.pe_ratio },
+                          { label: '30d Change', value: company.price_change_30d },
+                        ].map((m, j) => (
+                          <div key={j} style={{ padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                            <p style={{ color: '#64748b', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '5px' }}>{m.label}</p>
+                            <p style={{ color: '#f1f5f9', fontSize: '16px', fontWeight: '700' }}>{m.value}</p>
                           </div>
                         ))}
                       </div>
 
-                      {/* Insights and risks */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                        <div style={{
-                          background: 'rgba(34,197,94,0.05)', borderRadius: '12px',
-                          padding: '16px', border: '1px solid rgba(34,197,94,0.1)'
-                        }}>
-                          <p style={{ color: '#22c55e', fontSize: '12px', fontWeight: '700',
-                            textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
-                            ✓ Key Insights
-                          </p>
-                          {company.key_insights?.map((insight: string, k: number) => (
-                            <p key={k} style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '6px', lineHeight: '1.5' }}>
-                              • {insight}
-                            </p>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div style={{ padding: '14px', borderRadius: '8px', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.12)' }}>
+                          <p style={{ color: '#10b981', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Key Insights</p>
+                          {company.key_insights?.map((s: string, k: number) => (
+                            <p key={k} style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '5px', lineHeight: '1.5' }}>· {s}</p>
                           ))}
                         </div>
-                        <div style={{
-                          background: 'rgba(239,68,68,0.05)', borderRadius: '12px',
-                          padding: '16px', border: '1px solid rgba(239,68,68,0.1)'
-                        }}>
-                          <p style={{ color: '#ef4444', fontSize: '12px', fontWeight: '700',
-                            textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
-                            ⚠ Risk Factors
-                          </p>
-                          {company.risks?.map((risk: string, k: number) => (
-                            <p key={k} style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '6px', lineHeight: '1.5' }}>
-                              • {risk}
-                            </p>
+                        <div style={{ padding: '14px', borderRadius: '8px', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)' }}>
+                          <p style={{ color: '#ef4444', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Risk Factors</p>
+                          {company.risks?.map((s: string, k: number) => (
+                            <p key={k} style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '5px', lineHeight: '1.5' }}>· {s}</p>
                           ))}
                         </div>
                       </div>
                     </div>
                   ))}
 
-                  {/* News */}
                   {result.news_highlights?.length > 0 && (
-                    <div style={{
-                      background: 'rgba(30,41,59,0.6)', borderRadius: '16px', padding: '24px',
-                      marginBottom: '20px', border: '1px solid rgba(255,255,255,0.06)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                        <span>📰</span>
-                        <p style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '700',
-                          textTransform: 'uppercase', letterSpacing: '1px' }}>News Highlights</p>
-                      </div>
+                    <div style={{ padding: '20px', borderRadius: '12px', marginBottom: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', marginBottom: '14px' }}>News Highlights</p>
                       {result.news_highlights.map((news: any, i: number) => (
-                        <div key={i} style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          padding: '14px 0',
-                          borderBottom: i < result.news_highlights.length - 1
-                            ? '1px solid rgba(255,255,255,0.04)' : 'none'
-                        }}>
-                          <p style={{ color: '#cbd5e1', fontSize: '14px', flex: 1, marginRight: '16px', lineHeight: '1.5' }}>
-                            {news.title}
-                          </p>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                            <span style={{ color: '#475569', fontSize: '12px' }}>{news.source}</span>
-                            <span style={{
-                              padding: '3px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
-                              background: sentimentBg(news.sentiment),
-                              color: sentimentColor(news.sentiment)
-                            }}>{news.sentiment}</span>
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < result.news_highlights.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                          <p style={{ color: '#94a3b8', fontSize: '13px', flex: 1, marginRight: '16px', lineHeight: '1.5' }}>{news.title}</p>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+                            <span style={{ color: '#64748b', fontSize: '11px' }}>{news.source}</span>
+                            <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', background: sentimentBg(news.sentiment), color: sentimentColor(news.sentiment) }}>{news.sentiment}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
 
-                  {/* Recommendation */}
                   {result.recommendation && (
-                    <div style={{
-                      background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08))',
-                      borderRadius: '16px', padding: '24px',
-                      border: '1px solid rgba(59,130,246,0.15)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                        <span>🤖</span>
-                        <p style={{ color: '#60a5fa', fontSize: '12px', fontWeight: '700',
-                          textTransform: 'uppercase', letterSpacing: '1px' }}>AI Recommendation</p>
-                      </div>
-                      <p style={{ color: '#e2e8f0', lineHeight: '1.7', fontSize: '15px', marginBottom: '12px' }}>
-                        {result.recommendation}
-                      </p>
-                      <p style={{ color: '#475569', fontSize: '12px' }}>
-                        📡 Sources: {result.sources?.join(' · ')}
-                      </p>
+                    <div style={{ padding: '20px', borderRadius: '12px', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1px', color: '#60a5fa', textTransform: 'uppercase', marginBottom: '8px' }}>AI Recommendation</p>
+                      <p style={{ color: '#e2e8f0', fontSize: '14px', lineHeight: '1.7', marginBottom: '10px' }}>{result.recommendation}</p>
+                      <p style={{ color: '#64748b', fontSize: '11px' }}>Sources: {result.sources?.join(' · ')}</p>
                     </div>
                   )}
                 </div>
@@ -389,55 +414,34 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Reports Tab */}
+          {/* REPORTS TAB */}
           {activeTab === 'reports' && (
             <div>
-              <div style={{ marginBottom: '28px' }}>
-                <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#f1f5f9', marginBottom: '6px' }}>
-                  Saved Reports
-                </h2>
-                <p style={{ color: '#475569', fontSize: '14px' }}>
-                  All research reports for {org?.name}
+              <div style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>Saved Reports</h1>
+                <p style={{ color: '#64748b', fontSize: '13px' }}>
+                  {isAdmin() ? `All reports for ${org?.name}` : 'Your research reports'}
                 </p>
               </div>
-
               {reports.length === 0 ? (
-                <div style={{
-                  background: 'rgba(30,41,59,0.6)', borderRadius: '16px', padding: '60px',
-                  textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)'
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-                  <p style={{ color: '#64748b', fontSize: '16px' }}>No reports yet.</p>
-                  <p style={{ color: '#475569', fontSize: '14px', marginTop: '4px' }}>
-                    Run a research query to get started!
-                  </p>
+                <div style={{ padding: '60px', borderRadius: '14px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <p style={{ fontSize: '32px', marginBottom: '12px' }}>📋</p>
+                  <p style={{ color: '#64748b', fontSize: '14px' }}>No reports yet — run a query first!</p>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-                  {reports.map((report: any) => (
-                    <div key={report.id} style={{
-                      background: 'rgba(30,41,59,0.6)', borderRadius: '16px', padding: '20px',
-                      border: '1px solid rgba(255,255,255,0.06)',
-                      display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
-                    }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '12px' }}>
+                  {reports.map((r: any) => (
+                    <div key={r.id} style={{ padding: '18px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <div style={{ fontSize: '24px', marginBottom: '12px' }}>📄</div>
-                        <p style={{ color: '#f1f5f9', fontWeight: '700', marginBottom: '8px', fontSize: '15px', lineHeight: '1.4' }}>
-                          {report.title}
-                        </p>
-                        <p style={{ color: '#475569', fontSize: '12px' }}>
-                          {new Date(report.created_at).toLocaleDateString('en-US', {
-                            month: 'short', day: 'numeric', year: 'numeric'
-                          })}
-                        </p>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '16px' }}>📄</div>
+                        <p style={{ color: '#e2e8f0', fontWeight: '600', fontSize: '14px', marginBottom: '6px', lineHeight: '1.4' }}>{r.title}</p>
+                        <p style={{ color: '#64748b', fontSize: '11px' }}>{new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                       </div>
-                      <button onClick={() => deleteReport(report.id).then(fetchReports)} style={{
-                        marginTop: '16px', padding: '8px', background: 'rgba(239,68,68,0.1)',
-                        border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
-                        color: '#f87171', fontSize: '13px', cursor: 'pointer', fontWeight: '600'
-                      }}>
-                        🗑 Delete
-                      </button>
+                      {isAdmin() && (
+                        <button onClick={() => deleteReport(r.id).then(fetchReports)} style={{ marginTop: '14px', padding: '7px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}>
+                          Delete
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -445,54 +449,88 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Watchlist Tab */}
+          {/* WATCHLIST TAB */}
           {activeTab === 'watchlist' && (
             <div>
-              <div style={{ marginBottom: '28px' }}>
-                <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#f1f5f9', marginBottom: '6px' }}>
-                  Watchlist
-                </h2>
-                <p style={{ color: '#475569', fontSize: '14px' }}>
-                  Companies you're tracking
-                </p>
+              <div style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>Watchlist</h1>
+                <p style={{ color: '#64748b', fontSize: '13px' }}>Companies you are tracking</p>
               </div>
-
               {watchlist.length === 0 ? (
-                <div style={{
-                  background: 'rgba(30,41,59,0.6)', borderRadius: '16px', padding: '60px',
-                  textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)'
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>⭐</div>
-                  <p style={{ color: '#64748b', fontSize: '16px' }}>No companies in watchlist.</p>
+                <div style={{ padding: '60px', borderRadius: '14px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <p style={{ fontSize: '32px', marginBottom: '12px' }}>⭐</p>
+                  <p style={{ color: '#64748b', fontSize: '14px' }}>No companies yet</p>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px' }}>
                   {watchlist.map((item: any) => (
-                    <div key={item.id} style={{
-                      background: 'rgba(30,41,59,0.6)', borderRadius: '16px', padding: '20px',
-                      border: '1px solid rgba(255,255,255,0.06)'
-                    }}>
-                      <div style={{
-                        width: '44px', height: '44px', borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: '800', color: 'white', marginBottom: '12px', fontSize: '16px'
-                      }}>
-                        {item.symbol?.[0]}
-                      </div>
-                      <p style={{ color: '#f1f5f9', fontWeight: '700', fontSize: '15px' }}>{item.company_name}</p>
-                      <p style={{ color: '#3b82f6', fontSize: '13px', fontWeight: '600', marginBottom: '16px' }}>{item.symbol}</p>
-                      <button onClick={() => removeFromWatchlist(item.id).then(fetchWatchlist)} style={{
-                        width: '100%', padding: '8px', background: 'rgba(239,68,68,0.1)',
-                        border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
-                        color: '#f87171', fontSize: '13px', cursor: 'pointer', fontWeight: '600'
-                      }}>Remove</button>
+                    <div key={item.id} style={{ padding: '18px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ width: '38px', height: '38px', borderRadius: '9px', background: 'linear-gradient(135deg, #2563eb, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', color: 'white', marginBottom: '10px' }}>{item.symbol?.[0]}</div>
+                      <p style={{ color: '#e2e8f0', fontWeight: '600', fontSize: '14px' }}>{item.company_name}</p>
+                      <p style={{ color: '#3b82f6', fontSize: '12px', fontWeight: '600', marginBottom: '14px' }}>{item.symbol}</p>
+                      <button onClick={() => removeFromWatchlist(item.id).then(fetchWatchlist)} style={{ width: '100%', padding: '7px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}>Remove</button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           )}
+
+          {/* ADMIN TAB */}
+          {activeTab === 'admin' && isAdmin() && (
+            <div>
+              <div style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>Admin Panel</h1>
+                <p style={{ color: '#64748b', fontSize: '13px' }}>Manage your organization workspace</p>
+              </div>
+
+              <div style={{ padding: '24px', borderRadius: '12px', marginBottom: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px' }}>Organization Details</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px' }}>
+                  {[
+                    { label: 'Org Name', value: org?.name },
+                    { label: 'Invite Code', value: org?.invite_code },
+                    { label: 'Total Reports', value: reports.length },
+                  ].map((item, i) => (
+                    <div key={i} style={{ padding: '16px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <p style={{ color: '#64748b', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>{item.label}</p>
+                      <p style={{ color: '#f1f5f9', fontSize: '16px', fontWeight: '700', fontFamily: item.label === 'Invite Code' ? 'monospace' : 'inherit' }}>{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '24px', borderRadius: '12px', marginBottom: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px' }}>Role Permissions</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  {[
+                    { feature: 'Run Research Queries', admin: true, analyst: true },
+                    { feature: 'View Saved Reports', admin: true, analyst: true },
+                    { feature: 'Delete Reports', admin: true, analyst: false },
+                    { feature: 'Manage Watchlist', admin: true, analyst: true },
+                    { feature: 'View Invite Code', admin: true, analyst: false },
+                    { feature: 'Access Admin Panel', admin: true, analyst: false },
+                  ].map((row, i) => (
+                    <div key={i} style={{ padding: '14px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>{row.feature}</span>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', background: row.admin ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: row.admin ? '#10b981' : '#ef4444' }}>Admin</span>
+                        <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', background: row.analyst ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: row.analyst ? '#10b981' : '#ef4444' }}>Analyst</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '20px', borderRadius: '12px', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}>
+                <p style={{ color: '#60a5fa', fontSize: '12px', fontWeight: '700', marginBottom: '8px' }}>🔑 How to invite teammates</p>
+                <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: '1.6' }}>
+                  Share your invite code <strong style={{ color: '#f1f5f9', fontFamily: 'monospace' }}>{org?.invite_code}</strong> with your team. They enter it during signup to join <strong style={{ color: '#f1f5f9' }}>{org?.name}</strong> and will see all shared reports.
+                </p>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

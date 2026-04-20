@@ -82,13 +82,13 @@ def run_agent(query: str) -> dict:
         {
             "role": "system",
             "content": """You are a financial research assistant with access to tools.
-IMPORTANT: You MUST call the relevant tools to get real data before responding.
+You MUST call the relevant tools to get real data before responding.
 - For stock questions: call get_stock_data
-- For news questions: call get_news  
+- For news questions: call get_news
 - For filings/documents: call search_documents
 - For general company queries: call both get_stock_data AND get_news
 
-After getting tool results, respond with ONLY a valid JSON object like this:
+After getting tool results, respond with ONLY a valid JSON object:
 {
     "summary": "2-3 sentence overview",
     "companies": [
@@ -123,65 +123,121 @@ Do NOT include any text outside the JSON. No markdown, no backticks."""
         }
     ]
 
-    # Step 1 — First call: agent decides which tools to use
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        tools=tools,
-        tool_choice="auto",
-        max_tokens=4096
-    )
+    try:
+        # First attempt with tool calling
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
+            max_tokens=4096
+        )
 
-    response_message = response.choices[0].message
+        response_message = response.choices[0].message
 
-    # Step 2 — Run all the tools the agent asked for
-    if response_message.tool_calls:
-        messages.append({
-            "role": "assistant",
-            "content": response_message.content or "",
-            "tool_calls": [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {
-                        "name": tc.function.name,
-                        "arguments": tc.function.arguments
-                    }
-                }
-                for tc in response_message.tool_calls
-            ]
-        })
-
-        # Run each tool and add results to messages
-        for tool_call in response_message.tool_calls:
-            tool_name = tool_call.function.name
-            tool_args = json.loads(tool_call.function.arguments)
-            tool_result = run_tool(tool_name, tool_args)
-
+        if response_message.tool_calls:
             messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": tool_result
+                "role": "assistant",
+                "content": response_message.content or "",
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments
+                        }
+                    }
+                    for tc in response_message.tool_calls
+                ]
             })
 
-    # Step 3 — Final call: agent synthesizes everything into structured output
-    final_response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        max_tokens=4096
-    )
+            for tool_call in response_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = json.loads(tool_call.function.arguments)
+                tool_result = run_tool(tool_name, tool_args)
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": tool_result
+                })
+
+        final_response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            max_tokens=4096
+        )
+
+    except Exception:
+        # Fallback — call tools manually based on query keywords
+        query_lower = query.lower()
+        tool_results = []
+
+        # Extract company symbols from query
+        common = {
+            "apple": "AAPL", "nvidia": "NVDA", "tesla": "TSLA",
+            "microsoft": "MSFT", "google": "GOOGL", "alphabet": "GOOGL",
+            "amazon": "AMZN", "meta": "META", "netflix": "NFLX",
+            "blackrock": "BLK", "jpmorgan": "JPM", "ford": "F",
+            "amd": "AMD", "intel": "INTC", "samsung": "SSNLF"
+        }
+
+        symbol = None
+        company_name = None
+        for name, sym in common.items():
+            if name in query_lower:
+                symbol = sym
+                company_name = name.capitalize()
+                break
+
+        if symbol:
+            stock_result = run_tool("get_stock_data", {"symbol": symbol})
+            tool_results.append(f"Stock data: {stock_result}")
+            news_result = run_tool("get_news", {"company_name": company_name, "symbol": symbol})
+            tool_results.append(f"News data: {news_result}")
+
+        doc_result = run_tool("search_documents", {"query": query})
+        tool_results.append(f"Document data: {doc_result}")
+
+        fallback_messages = [
+            {
+                "role": "system",
+                "content": """Analyze the following financial data and respond with ONLY valid JSON:
+{
+    "summary": "2-3 sentence overview",
+    "companies": [{"name": "...", "symbol": "...", "current_price": 0, "market_cap": "...", "pe_ratio": 0, "price_change_30d": "...", "sentiment": "positive", "key_insights": [], "risks": []}],
+    "news_highlights": [{"title": "...", "sentiment": "positive", "source": "..."}],
+    "risk_assessment": "...",
+    "recommendation": "...",
+    "sources": ["Yahoo Finance", "NewsAPI"]
+}"""
+            },
+            {
+                "role": "user",
+                "content": f"Query: {query}\n\nData:\n" + "\n".join(tool_results)
+            }
+        ]
+
+        final_response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=fallback_messages,
+            max_tokens=4096
+        )
 
     raw = final_response.choices[0].message.content
 
-    # Parse JSON response
     try:
-        # Clean up if model adds markdown backticks
         if "```json" in raw:
             raw = raw.split("```json")[1].split("```")[0].strip()
         elif "```" in raw:
             raw = raw.split("```")[1].split("```")[0].strip()
         result = json.loads(raw)
     except Exception:
-        result = {"summary": raw, "companies": [], "news_highlights": [], "sources": []}
+        result = {
+            "summary": raw,
+            "companies": [],
+            "news_highlights": [],
+            "sources": []
+        }
 
     return result

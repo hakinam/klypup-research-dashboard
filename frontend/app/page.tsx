@@ -96,7 +96,7 @@ export default function Home() {
 
       {/* Right side - form */}
       <div style={{
-        width: '580px', display: 'flex', alignItems: 'left',
+        width: '580px', display: 'flex', alignItems: 'center',
         justifyContent: 'center', padding: '40px',
         background: 'rgba(7, 7, 7, 0.3)',
         backdropFilter: 'blur(2px)'
