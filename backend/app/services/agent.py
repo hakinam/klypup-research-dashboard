@@ -104,13 +104,13 @@ After getting tool results, respond with ONLY a valid JSON object:
             "risks": ["risk 1", "risk 2"]
         }
     ],
-    "news_highlights": [
+   "news_highlights": [
         {
             "title": "Article title",
             "sentiment": "positive",
             "source": "Source name"
         }
-    ],
+    ],   
     "risk_assessment": "Overall risk paragraph",
     "recommendation": "Buy/Hold/Sell with reasoning",
     "sources": ["Yahoo Finance", "NewsAPI"]

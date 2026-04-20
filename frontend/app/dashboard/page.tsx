@@ -1,7 +1,17 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getReports, getWatchlist, deleteReport, removeFromWatchlist, runQuery } from '@/lib/api';
+import { getReports, getWatchlist, deleteReport, removeFromWatchlist, runQuery, getStockChart } from '@/lib/api';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -13,21 +23,35 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('query');
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('1mo');
+  const [chartDataMap, setChartDataMap] = useState<Record<string, { date: string; close: number }[]>>({});
+  const [chartLoadingMap, setChartLoadingMap] = useState<Record<string, boolean>>({});
+  const [chartErrorMap, setChartErrorMap] = useState<Record<string, string>>({});
 
-  const isAdmin = () => {
-    const u = localStorage.getItem('user');
-    if (!u) return false;
-    return JSON.parse(u).role === 'admin';
-  };
+
 
   useEffect(() => {
     if (!localStorage.getItem('token')) { router.push('/'); return; }
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     setUser(storedUser);
+    setIsUserAdmin(storedUser.role === 'admin');
     setOrg(JSON.parse(localStorage.getItem('org') || '{}'));
     fetchReports();
     fetchWatchlist();
   }, []);
+
+  useEffect(() => {
+  if (!result?.companies?.length) return;
+
+  result.companies.forEach((company: any) => {
+    if (company.symbol) {
+      fetchStockChart(company.symbol, selectedPeriod);
+    }
+  });
+}, [result, selectedPeriod]);
+
+
 
   const fetchReports = async () => {
     try { const res = await getReports(); setReports(res.data); } catch {}
@@ -35,6 +59,32 @@ export default function Dashboard() {
   const fetchWatchlist = async () => {
     try { const res = await getWatchlist(); setWatchlist(res.data); } catch {}
   };
+ const fetchStockChart = async (ticker: string, period: string) => {
+  try {
+    setChartLoadingMap(prev => ({ ...prev, [ticker]: true }));
+    setChartErrorMap(prev => ({ ...prev, [ticker]: '' }));
+
+    const res = await getStockChart(ticker, period);
+
+    setChartDataMap(prev => ({
+      ...prev,
+      [ticker]: res.data.data || [],
+    }));
+  } catch {
+    setChartErrorMap(prev => ({
+      ...prev,
+      [ticker]: 'Failed to load stock chart',
+    }));
+    setChartDataMap(prev => ({
+      ...prev,
+      [ticker]: [],
+    }));
+  } finally {
+    setChartLoadingMap(prev => ({ ...prev, [ticker]: false }));
+  }
+};
+
+
   const handleQuery = async () => {
     if (!query.trim()) return;
     setLoading(true); setResult(null);
@@ -61,7 +111,7 @@ export default function Dashboard() {
     { id: 'watchlist', label: 'Watchlist', icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     )},
-    ...(isAdmin() ? [{ id: 'admin', label: 'Admin Panel', icon: (
+    ...(isUserAdmin ? [{ id: 'admin', label: 'Admin Panel', icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
     )}] : []),
   ];
@@ -129,7 +179,7 @@ export default function Dashboard() {
             }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
               <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '500' }}>{org.name}</span>
-              {isAdmin() && (
+              {isUserAdmin && (
                 <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace' }}>
                   🔑 {org.invite_code}
                 </span>
@@ -308,6 +358,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
+
                   <div style={{ borderRadius: '14px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1px', color: '#64748b', textTransform: 'uppercase', marginBottom: '14px' }}>Example Queries</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '8px' }}>
@@ -369,6 +420,98 @@ export default function Dashboard() {
                           </div>
                         ))}
                       </div>
+                      <div style={{
+                        padding: '16px',
+                        borderRadius: '10px',
+                        marginBottom: '16px',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.05)'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '14px',
+                          gap: '12px',
+                          flexWrap: 'wrap'
+                        }}>
+                          <div>
+                            <p style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600' }}>
+                              {company.symbol} price history
+                            </p>
+                          </div>
+
+                          <select
+                            value={selectedPeriod}
+                            onChange={(e) => setSelectedPeriod(e.target.value)}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '8px',
+                              border: '1px solid rgba(255,255,255,0.08)',
+                              background: '#0f172a',
+                              color: '#e2e8f0',
+                              outline: 'none',
+                              fontSize: '12px'
+                            }}
+                          >
+                            <option value="5d">5D</option>
+                            <option value="1mo">1M</option>
+                            <option value="3mo">3M</option>
+                            <option value="6mo">6M</option>
+                            <option value="1y">1Y</option>
+                          </select>
+                        </div>
+
+                        {chartLoadingMap[company.symbol] ? (
+                          <div style={{
+                            height: '260px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#94a3b8',
+                            fontSize: '13px'
+                          }}>
+                            Loading chart...
+                          </div>
+                        ) : chartErrorMap[company.symbol] ? (
+                          <div style={{
+                            height: '260px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#ef4444',
+                            fontSize: '13px'
+                          }}>
+                            {chartErrorMap[company.symbol]}
+                          </div>
+                        ) : (
+                          <div style={{ width: '100%', height: '260px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={chartDataMap[company.symbol] || []}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                                <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} />
+                                <YAxis stroke="#94a3b8" fontSize={11} domain={['auto', 'auto']} />
+                                <Tooltip
+                                  contentStyle={{
+                                    backgroundColor: '#0f172a',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    borderRadius: '10px',
+                                    color: '#e2e8f0'
+                                  }}
+                                />
+                                <Line
+                                  type="monotone"
+                                  dataKey="close"
+                                  stroke="#10b981"
+                                  strokeWidth={2.5}
+                                  dot={false}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        )}
+                      </div>
+
 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <div style={{ padding: '14px', borderRadius: '8px', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.12)' }}>
@@ -420,7 +563,7 @@ export default function Dashboard() {
               <div style={{ marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>Saved Reports</h1>
                 <p style={{ color: '#64748b', fontSize: '13px' }}>
-                  {isAdmin() ? `All reports for ${org?.name}` : 'Your research reports'}
+                  {isUserAdmin ? `All reports for ${org?.name}` : 'Your research reports'}
                 </p>
               </div>
               {reports.length === 0 ? (
@@ -437,7 +580,7 @@ export default function Dashboard() {
                         <p style={{ color: '#e2e8f0', fontWeight: '600', fontSize: '14px', marginBottom: '6px', lineHeight: '1.4' }}>{r.title}</p>
                         <p style={{ color: '#64748b', fontSize: '11px' }}>{new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                       </div>
-                      {isAdmin() && (
+                      {isUserAdmin && (
                         <button onClick={() => deleteReport(r.id).then(fetchReports)} style={{ marginTop: '14px', padding: '7px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}>
                           Delete
                         </button>
@@ -477,7 +620,7 @@ export default function Dashboard() {
           )}
 
           {/* ADMIN TAB */}
-          {activeTab === 'admin' && isAdmin() && (
+          {activeTab === 'admin' && isUserAdmin && (
             <div>
               <div style={{ marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>Admin Panel</h1>

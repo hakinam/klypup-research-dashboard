@@ -1,11 +1,13 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.models.database import get_db
 from app.models.models import ResearchReport, User
 from app.api.routes.deps import get_current_user
 from app.services.agent import run_agent
+import yfinance as yf
+
 
 router = APIRouter()
 
@@ -103,3 +105,33 @@ def delete_report(
     db.delete(report)
     db.commit()
     return {"message": "Report deleted successfully"}
+
+@router.get("/stock-chart")
+def get_stock_chart(
+    ticker: str = Query(..., min_length=1),
+    period: str = Query("1mo")
+):
+    allowed_periods = {"5d", "1mo", "3mo", "6mo", "1y"}
+    if period not in allowed_periods:
+        raise HTTPException(status_code=400, detail="Invalid period")
+
+    stock = yf.Ticker(ticker.upper())
+    history = stock.history(period=period)
+
+    if history.empty:
+        raise HTTPException(status_code=404, detail="No stock data found")
+
+    chart_data = []
+    for date, row in history.iterrows():
+        close_price = row.get("Close")
+        if close_price is not None:
+            chart_data.append({
+                "date": date.strftime("%Y-%m-%d"),
+                "close": round(float(close_price), 2)
+            })
+
+    return {
+        "ticker": ticker.upper(),
+        "period": period,
+        "data": chart_data
+    }

@@ -23,6 +23,10 @@ export const runQuery = (query: string, tags: string) =>
 export const getReports = () => API.get('/api/research/reports');
 export const getReport = (id: number) => API.get(`/api/research/reports/${id}`);
 export const deleteReport = (id: number) => API.delete(`/api/research/reports/${id}`);
+export const getStockChart = (ticker: string, period: string = '1mo') =>
+  API.get('/api/research/stock-chart', {
+    params: { ticker, period },
+  });
 
 // Watchlist
 export const getWatchlist = () => API.get('/api/watchlist/');
