@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getReports, getWatchlist, deleteReport, removeFromWatchlist, runQuery, getStockChart } from '@/lib/api';
+import { getReports, getWatchlist, addToWatchlist, deleteReport, removeFromWatchlist, runQuery, getStockChart } from '@/lib/api';
 import {
   LineChart,
   Line,
@@ -39,7 +39,18 @@ export default function Dashboard() {
     setOrg(JSON.parse(localStorage.getItem('org') || '{}'));
     fetchReports();
     fetchWatchlist();
+
   }, []);
+
+  const handleAddToWatchlist = async (symbol: string, companyName: string) => {
+  try {
+    await addToWatchlist(symbol, companyName);
+    fetchWatchlist();
+    alert(`${symbol} added to watchlist`);
+  } catch (err: any) {
+    alert(err.response?.data?.detail || 'Failed to add to watchlist');
+  }
+  };
 
   useEffect(() => {
   if (!result?.companies?.length) return;
@@ -402,9 +413,28 @@ export default function Dashboard() {
                             <p style={{ color: '#64748b', fontSize: '12px' }}>{company.symbol} · Stock Analysis</p>
                           </div>
                         </div>
-                        <span style={{ padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', background: sentimentBg(company.sentiment), color: sentimentColor(company.sentiment), border: `1px solid ${sentimentColor(company.sentiment)}33` }}>
-                          {company.sentiment === 'positive' ? '▲' : company.sentiment === 'negative' ? '▼' : '●'} {company.sentiment}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <button
+                              onClick={() => handleAddToWatchlist(company.symbol, company.name)}
+                              style={{
+                                padding: '7px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(59,130,246,0.25)',
+                                background: 'rgba(59,130,246,0.12)',
+                                color: '#60a5fa',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              + Watchlist
+                            </button>
+
+                            <span style={{ padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', background: sentimentBg(company.sentiment), color: sentimentColor(company.sentiment), border: `1px solid ${sentimentColor(company.sentiment)}33` }}>
+                              {company.sentiment === 'positive' ? '▲' : company.sentiment === 'negative' ? '▼' : '●'} {company.sentiment}
+                            </span>
+                          </div>
+
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px', marginBottom: '16px' }}>

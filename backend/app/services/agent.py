@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.tools.stock_tool import get_stock_data
 from app.tools.news_tool import get_news
 from app.tools.vector_tool import search_documents
+import re
 
 client = Groq(api_key=settings.GROQ_API_KEY)
 
@@ -168,10 +169,29 @@ Do NOT include any text outside the JSON. No markdown, no backticks."""
             max_tokens=4096
         )
 
-    except Exception:
+    except Exception as e:
+        error_message = str(e)
+
+        if "rate limit" in error_message.lower() or "429" in error_message:
+            wait_time = "a little while"
+            match = re.search(r"try again in ([0-9a-zA-Z\.\-]+)", error_message, re.IGNORECASE)
+            if match:
+                wait_time = match.group(1)
+
+            return {
+                "summary": f"AI research is temporarily unavailable because the Groq daily usage limit has been reached.",
+                "companies": [],
+                "news_highlights": [],
+                "risk_assessment": f"Rate limit reached. Estimated retry time: {wait_time}.",
+                "recommendation": f"Retry the query in {wait_time}",
+                "sources": ["Groq"]
+            }
+
         # Fallback — call tools manually based on query keywords
         query_lower = query.lower()
         tool_results = []
+
+
 
         # Extract company symbols from query
         common = {
