@@ -83,7 +83,7 @@ sequenceDiagram
 
 ```
 ### What happens in practice: 
-- User types a natural-language query in the dashboard.
+- User types a natural language query in the dashboard.
 - Frontend sends POST /api/research/query with the JWT token.
 - Backend resolves the authenticated user via deps.py.
 - research.py calls run_agent(query).
@@ -162,12 +162,11 @@ flowchart TD
 
 ```
 ### - Notes
-- Tool use is query-dependent, not a fixed hardcoded sequence.
-- If the user only asks for news, the system should prefer news-related tools.
+- Tool use is query dependent, not a fixed hardcoded sequence.
+- If the user only asks for news, the system should prefer news related tools.
 - If the user asks about filings or earnings details, document search is included.
 - The final output is structured JSON, not raw markdown.
-Fallback behavior
-- If tool-calling or provider responses fail, the agent includes a fallback path that attempts manual tool selection based on the query and returns a degraded but usable result when possible.
+- Fallback behavior: If tool-calling or provider responses fail, the agent includes a fallback path that attempts manual tool selection based on the query and returns a degraded but usable result when possible.
 ## 5. Multi-Tenant Data Flow
 ```mermaid
 flowchart TD
