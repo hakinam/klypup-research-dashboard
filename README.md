@@ -9,8 +9,7 @@ An AI-powered investment research platform that lets analysts research any compa
 ![Dashboard2](frontend/public/screenshots/Dashboard2.png)
 ![Query Results1](frontend/public/screenshots/result1.png)
 ![Query Results2](frontend/public/screenshots/result2.png)
-![Admin Panel](frontend/public/screenshots/admin.png)
-![Admin Panel2](frontend/public/screenshots/admin2.png)
+![Admin Panel](frontend/public/screenshots/admin3.png)
 
 ## What it does
 
