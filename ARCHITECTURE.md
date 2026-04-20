@@ -1,5 +1,3 @@
-# Architecture Document — Klypup Research Dashboard
-
 ## 1. System Architecture Overview
 
 ```mermaid
@@ -47,12 +45,11 @@ flowchart TB
     Vector --> Chroma
     Stock -->|Yahoo Finance| YF["Yahoo Finance"]
     News -->|REST API| NewsAPI["NewsAPI"]
-    Research query flow
+```
 
-## Data Flow Diagram
-
-    ```mermaid
-    sequenceDiagram
+## 2. Data Flow Diagram
+```mermaid
+sequenceDiagram
     participant User
     participant FE as Next.js Frontend
     participant API as FastAPI Backend
@@ -95,7 +92,6 @@ The backend executes the selected tools.
 Tool results are sent back to Groq for synthesis into structured JSON.
 Backend stores the result in research_reports.
 Frontend renders the response as structured UI components.
-
 ## 3. Database Schema
 ```mermaid
 erDiagram
