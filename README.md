@@ -68,15 +68,15 @@ python3 -m venv venv
 ```bash
 Activate virtual environment:
 - For mac/Linux (bash):
-```source venv/bin/activate```
+source venv/bin/activate
 - For windows (PowerShell):
-```venv\Scripts\Activate.ps1```
+venv\Scripts\Activate.ps1
 - For Windows cmd:
-```venv\Scripts\activate.bat```
+venv\Scripts\activate.bat
 ```
 ```bash
 Then install dependencies:
-```pip install -r requirements.txt```
+pip install -r requirements.txt
 ```
 
 Create `.env` file in the backend folder (see `.env.example` in the backend folder):
