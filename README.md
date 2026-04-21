@@ -1,4 +1,4 @@
-# Klypup Research Dashboard 🚀
+# Klypup Research Dashboard
 
 An AI-powered investment research platform that lets analysts research any company in seconds. Built for the Klypup Applied AI Intern Assessment — Option A.
 
@@ -35,21 +35,21 @@ Type any research query like *"Analyze NVIDIA's stock and recent news"* and the 
 
 ## Features
 
-- ✅ JWT Authentication (signup, login, logout, protected routes)
-- ✅ Multi-tenant architecture (org isolation via org_id on every query)
-- ✅ Role-based access control (Admin vs Analyst — different UI and permissions)
-- ✅ AI agent with 3 tools (stock data, news, document search)
-- ✅ Intelligent tool calling (agent decides which tools to use per query)
-- ✅ Real-time stock data (price, market cap, P/E ratio, EPS)
-- ✅ Interactive stock price charts (5D, 1M, 3M, 6M, 1Y periods)
-- ✅ News sentiment analysis (positive/negative/neutral classification)
-- ✅ RAG document search (ChromaDB vector store with earnings reports)
-- ✅ Saved research reports (full CRUD)
-- ✅ Company watchlist (add from results, remove anytime)
-- ✅ Organization invite code system
-- ✅ Source attribution on every AI insight
-- ✅ Admin panel with role permissions overview
-- ✅ Structured UI output (cards, badges, metrics, charts)
+-  JWT Authentication (signup, login, logout, protected routes)
+-  Multi-tenant architecture (org isolation via org_id on every query)
+-  Role-based access control (Admin vs Analyst — different UI and permissions)
+-  AI agent with 3 tools (stock data, news, document search)
+-  Intelligent tool calling (agent decides which tools to use per query)
+-  Real-time stock data (price, market cap, P/E ratio, EPS)
+-  Interactive stock price charts (5D, 1M, 3M, 6M, 1Y periods)
+-  News sentiment analysis (positive/negative/neutral classification)
+-  RAG document search (ChromaDB vector store with earnings reports)
+-  Saved research reports (full CRUD)
+-  Company watchlist (add from results, remove anytime)
+-  Organization invite code system
+-  Source attribution on every AI insight
+-  Admin panel with role permissions overview
+-  Structured UI output (cards, badges, metrics, charts)
 
 ## Setup Instructions
 
