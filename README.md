@@ -71,7 +71,7 @@ Activate virtual environment:
 - For windows (PowerShell):
 ```venv\Scripts\Activate.ps1```
 - For Windows cmd:
-```venv\Scripts\activate.bat```
+```venv\Scripts\activate.bat```<br>
 Then install dependencies:
 ```pip install -r requirements.txt```
 
