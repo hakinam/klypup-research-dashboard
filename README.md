@@ -68,11 +68,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create `.env` file (see `.env.example`):
-GROQ_API_KEY=your_groq_key_here
-NEWS_API_KEY=your_newsapi_key_here
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=sqlite:///./research.db
+Create `.env` file (see `.env.example`in the backend folder):
+- GROQ_API_KEY=your_groq_key_here
+- NEWS_API_KEY=your_newsapi_key_here
+- SECRET_KEY=your-secret-key-here
+- DATABASE_URL=sqlite:///./research.db
 
 Ingest sample financial documents into ChromaDB:
 ```bash
