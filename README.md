@@ -69,12 +69,11 @@ python3 -m venv venv
 - For mac/Linux (bash):
 ```source venv/bin/activate```
 - For windows (PowerShell):
-```venv\Scripts\Activate.ps1```\\
+```venv\Scripts\Activate.ps1```
 - For Windows cmd:
-```venv\Scripts\activate.bat```\\
+```venv\Scripts\activate.bat```
 - Then install dependencies:
 ```pip install -r requirements.txt```
-```
 
 Create `.env` file in the backend folder (see `.env.example` in the backend folder):
 - GROQ_API_KEY=your_groq_key_here
