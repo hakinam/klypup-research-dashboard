@@ -14,11 +14,11 @@ An AI-powered investment research platform that lets analysts research any compa
 ## What it does
 
 Type any research query like *"Analyze NVIDIA's stock and recent news"* and the AI agent automatically:
-- Fetches real-time stock data from Yahoo Finance
+- Fetches real time stock data from Yahoo Finance
 - Gets latest news articles with sentiment analysis
 - Searches through earnings reports and SEC filings using RAG
 - Synthesizes everything into a structured analysis with insights, risks, and recommendations
-- Renders results as cards, charts, sentiment badges, not raw text
+- Renders results as cards, charts, sentiment badges instead of raw text.
 
 ## Tech Stack
 
@@ -44,10 +44,10 @@ Type any research query like *"Analyze NVIDIA's stock and recent news"* and the 
 -  Interactive stock price charts (5D, 1M, 3M, 6M, 1Y periods)
 -  News sentiment analysis (positive/negative/neutral classification)
 -  RAG document search (ChromaDB vector store with earnings reports)
--  Saved research reports (full CRUD)
+-  Saved research history with persistence and deletion
 -  Company watchlist (add from results, remove anytime)
 -  Organization invite code system
--  Source attribution on every AI insight
+-  AI analysis with visible source references
 -  Admin panel with role permissions overview
 -  Structured UI output (cards, badges, metrics, charts)
 
@@ -68,7 +68,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create `.env` file (see `.env.example`in the backend folder):
+Create `.env` file (see `.env.example` in the backend folder):
 - GROQ_API_KEY=your_groq_key_here
 - NEWS_API_KEY=your_newsapi_key_here
 - SECRET_KEY=your-secret-key-here
@@ -108,7 +108,7 @@ Frontend runs at **http://localhost:3000**
 
 ### 2. Multi-Tenant Isolation
 - Create two accounts with different organization names
-- Run queries in each, reports are completely separate
+- Run queries in each - reports are completely separate
 - Share invite code with teammates to join same workspace
 - Admins can see invite code, analysts cannot
 
