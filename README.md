@@ -71,7 +71,7 @@ Activate virtual environment:
 - For windows (PowerShell):
 ```venv\Scripts\Activate.ps1```
 - For Windows cmd:
-```venv\Scripts\activate.bat```<br>
+```venv\Scripts\activate.bat```<br><br>
 Then install dependencies:
 ```pip install -r requirements.txt```
 
@@ -79,9 +79,9 @@ Create `.env` file in the backend folder (see `.env.example` in the backend fold
 - GROQ_API_KEY=your_groq_key_here
 - NEWS_API_KEY=your_newsapi_key_here
 - SECRET_KEY=your_long_random_secret_key_here
-- DATABASE_URL=sqlite:///./research.db
+- DATABASE_URL=sqlite:///./research.db<br>
 
-- SECRET_KEY can be any long random string used to sign JWT tokens for local development.
+ SECRET_KEY can be any long random string used to sign JWT tokens for local development.
 
 Ingest sample financial documents into ChromaDB:
 ```bash
