@@ -74,6 +74,8 @@ Create `.env` file in the backend folder (see `.env.example` in the backend fold
 - SECRET_KEY=your_long_random_secret_key_here
 - DATABASE_URL=sqlite:///./research.db
 
+- SECRET_KEY can be any long random string used to sign JWT tokens for local development.
+
 Ingest sample financial documents into ChromaDB:
 ```bash
 python data/sample_docs.py
