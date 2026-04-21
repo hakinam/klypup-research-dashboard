@@ -1,6 +1,6 @@
 # Klypup Research Dashboard
 
-An AI-powered investment research platform that lets analysts research any company in seconds..
+An AI-powered investment research platform that lets analysts research any company in seconds.
 
 ## Screenshots
 
