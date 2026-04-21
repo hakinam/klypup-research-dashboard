@@ -72,7 +72,7 @@ python3 -m venv venv
 ```venv\Scripts\Activate.ps1```
 - For Windows cmd:
 ```venv\Scripts\activate.bat```
-- Then install dependencies:
+Then install dependencies:
 ```pip install -r requirements.txt```
 
 Create `.env` file in the backend folder (see `.env.example` in the backend folder):
