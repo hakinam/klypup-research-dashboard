@@ -65,6 +65,7 @@ Type any research query like *"Analyze NVIDIA's stock and recent news"* and the 
 cd backend
 python3 -m venv venv
 ```
+```bash
 Activate virtual environment:
 - For mac/Linux (bash):
 ```source venv/bin/activate```
@@ -74,6 +75,7 @@ Activate virtual environment:
 ```venv\Scripts\activate.bat```<br><br>
 Then install dependencies:
 ```pip install -r requirements.txt```
+```
 
 Create `.env` file in the backend folder (see `.env.example` in the backend folder):
 - GROQ_API_KEY=your_groq_key_here
