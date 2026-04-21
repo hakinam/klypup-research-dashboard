@@ -64,7 +64,14 @@ Type any research query like *"Analyze NVIDIA's stock and recent news"* and the 
 ```bash
 cd backend
 python3 -m venv venv
+Activate virtual environment:
+For mac/Linux (bash):
 source venv/bin/activate
+For windows (PowerShell):
+venv\Scripts\Activate.ps1
+For Windows cmd:
+venv\Scripts\activate.bat
+Then install dependencies:
 pip install -r requirements.txt
 ```
 
