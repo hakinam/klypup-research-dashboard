@@ -18,7 +18,7 @@ Type any research query like *"Analyze NVIDIA's stock and recent news"* and the 
 - Gets latest news articles with sentiment analysis
 - Searches through earnings reports and SEC filings using RAG
 - Synthesizes everything into a structured analysis with insights, risks, and recommendations
-- Renders results as cards, charts, sentiment badges — not raw text
+- Renders results as cards, charts, sentiment badges, not raw text
 
 ## Tech Stack
 
@@ -108,7 +108,7 @@ Frontend runs at **http://localhost:3000**
 
 ### 2. Multi-Tenant Isolation
 - Create two accounts with different organization names
-- Run queries in each — reports are completely separate
+- Run queries in each, reports are completely separate
 - Share invite code with teammates to join same workspace
 - Admins can see invite code, analysts cannot
 
