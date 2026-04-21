@@ -101,7 +101,7 @@ Frontend runs at **http://localhost:3000**
 
 ### 1. AI Research Query
 - Sign up and create an organization
-- Type any company query: *"Analyze Apple stock and recent news"*
+- Type any company query: *"Analyze Apple stock"*
 - Watch the AI agent fetch real data and return structured analysis
 - View interactive stock price chart with period selector
 - Add company to watchlist directly from results
