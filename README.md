@@ -156,4 +156,4 @@ Frontend runs at **http://localhost:3000**
 ## Author
 
 **Innam Ul Haq**
-innamhaq7@gmail.com | [LinkedIn](linkedin.com/in/innam-ul-haq-801039280) | [GitHub](https://github.com/hakinam)
+innamhaq7@gmail.com | [LinkedIn](https://linkedin.com/in/innam-ul-haq-801039280) | [GitHub](https://github.com/hakinam)
