@@ -2,6 +2,10 @@
 
 An AI-powered investment research platform that lets analysts research any company in seconds.
 
+## 🚀 Live Demo
+[Try Klypup here](https://klypup-research-dashboard.vercel.app)
+
+> **Demo credentials:** Sign up with any email to create your own workspace!
 ## Screenshots
 
 ![Login Page](frontend/public/screenshots/login.png)
