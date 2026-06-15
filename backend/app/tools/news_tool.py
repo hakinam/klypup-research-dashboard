@@ -20,9 +20,9 @@ def get_news(company_name: str, symbol: str) -> dict:
     try:
         url = "https://newsapi.org/v2/everything"
         params = {
-            "q": f'"{company_name}" OR "{symbol}" stock',
-            "searchIn": "title,description",
-            "sortBy": "publishedAt",
+            "q": f'"{company_name}" stock',
+            "searchIn": "title",
+            "sortBy": "relevancy",
             "pageSize": 5,
             "language": "en",
             "apiKey": settings.NEWS_API_KEY
