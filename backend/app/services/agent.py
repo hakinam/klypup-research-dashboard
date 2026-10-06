@@ -127,7 +127,7 @@ Do NOT include any text outside the JSON. No markdown, no backticks."""
     try:
         # First attempt with tool calling
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=messages,
             tools=tools,
             tool_choice="auto",
@@ -164,7 +164,7 @@ Do NOT include any text outside the JSON. No markdown, no backticks."""
                 })
 
         final_response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=messages,
             max_tokens=4096
         )
@@ -239,7 +239,7 @@ Do NOT include any text outside the JSON. No markdown, no backticks."""
         ]
 
         final_response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=fallback_messages,
             max_tokens=4096
         )
